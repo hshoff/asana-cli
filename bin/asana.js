@@ -23,14 +23,6 @@ program
   .usage('[options] <cmds>');
 
 program
-  .command('install')
-  .description('  -- Install the app globally')
-  .action(function(){
-    console.log('\n');
-    exec('npm install -g asana', puts)
-  });
-
-program
   .command('me')
   .description(' -- Current user')
   .action(function(){

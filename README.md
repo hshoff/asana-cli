@@ -22,9 +22,6 @@ A CLI for Asana.
 	
 	  Commands:
 	
-	    install 
-	      -- Install the app globally
-	    
 	    me 
 	     -- Current user
 	    
