@@ -6,14 +6,13 @@ var program = require('commander'),
     archy   = require('archy'),
     _       = require('underscore'),
 
-    exec    = require('child_process').exec
+    fs      = require('fs'),
+    exec    = require('child_process').exec,
     spawn   = require('child_process').spawn,
 
-    API_VERSION = '1.0',
-    API_URL = 'https://app.asana.com/api/' + API_VERSION,
-    API_KEY = process.env.ASANA_API_KEY,
-    INDENT  = "  ",
-
+    config  = JSON.parse(fs.readFileSync('./config.json')),
+    ASANA_KEY = config['API_KEY'],
+    ASANA   = config['API_URL'] + config['API_VERSION'],
     authorized = false,
     me = {};
 
@@ -23,7 +22,7 @@ var program = require('commander'),
  */
 program
   .version('0.0.1')
-  .usage('[options] <args>');
+  .usage('[options] <cmds>');
 
 program
   .command('install')
@@ -63,21 +62,26 @@ function stream(data) {
   if (data) console.log(data);
 }
 
+function tasks() {
+  // request
+  //   .get(config.API_)
+}
+
 function setMe(verbose) {
   var verbose = verbose || false;
 
   request
-    .get(API_URL + '/users/me')
+    .get(ASANA + '/users/me')
     .query({opt_pretty: 'true'})
-    .auth(API_KEY,'')
+    .auth(ASANA_KEY,'')
     .end(function(res){
       if (res.ok) {
         me = res.body['data'];
         if (verbose) {
           console.log('');
-          console.log('name: '.blue+me['name']);
-          console.log('email: '.blue+me['email']);
-          console.log('id: '.blue+me['id']);
+          console.log('    name: '.blue+me['name']);
+          console.log('    email: '.blue+me['email']);
+          console.log('    id: '.blue+me['id']);
           console.log('');
           if (me['workspaces']) {
             printWorkspaces(me['workspaces']);
@@ -101,7 +105,7 @@ function printWorkspaces(workspaces) {
   s = archy({
     label: 'Workspaces'.green,
     nodes: nodes
-  }, INDENT+INDENT);
+  }, "    ");
 
   console.log(s);
 }
