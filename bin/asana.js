@@ -10,11 +10,9 @@ var program = require('commander'),
     exec    = require('child_process').exec,
     spawn   = require('child_process').spawn,
 
-    config  = JSON.parse(fs.readFileSync('./config.json')),
-    ASANA_KEY = config['API_KEY'],
-    ASANA   = config['API_URL'] + config['API_VERSION'],
-    authorized = false,
-    me = {};
+    CONFIG  = JSON.parse(fs.readFileSync('./config.json')),
+    ASANA_KEY = CONFIG['API_KEY'],
+    ASANA   = CONFIG['API_URL'] + CONFIG['API_VERSION'];
 
 
 /**
@@ -36,7 +34,7 @@ program
   .command('me')
   .description(' -- Current user')
   .action(function(){
-    setMe(true);
+    me();
   });
 
 program
@@ -44,6 +42,27 @@ program
   .description('  -- list all tasks assigned to you')
   .action(function(){
     tasks();
+  });
+
+program
+  .command('cd')
+  .description(' -- Change directory')
+  .action(function(){
+    cd();
+  });
+
+program
+  .command('ls')
+  .description(' -- List all in current directory')
+  .action(function(){
+
+  });
+
+program
+  .command('projects')
+  .description(' -- List all projects')
+  .action(function(){
+    projects();
   });
 
 program.parse(process.argv);
@@ -62,50 +81,85 @@ function stream(data) {
   if (data) console.log(data);
 }
 
-function tasks() {
-  // request
-  //   .get(config.API_)
+function cd() {
+  var dir = _.first(program.args);
+  console.log(dir);
 }
 
-function setMe(verbose) {
-  var verbose = verbose || false;
+function projects() {
+  request
+    .get(ASANA+'/projects')
+    .auth(ASANA_KEY,'')
+    .end(function(res){
+      var data = res['body']['data'];
+      printChildren(data, 'Projects')
+    });
+}
 
+function workspaces() {
+  request
+    .get(ASANA+'/workspaces')
+    .auth(ASANA_KEY,'')
+    .end(function(res){
+      var data = res['body']['data'];
+      printChildren(data, 'Workspaces')
+    });
+}
+
+function tasks() {
+  request
+    .get(ASANA + '/tasks')
+    .query({ assignee: 'me' })
+    .auth(ASANA_KEY,'')
+    .end(function(res){
+      var data = res['body']['data'];
+      printChildren(data, 'Tasks')
+    });
+}
+
+function me() {
   request
     .get(ASANA + '/users/me')
     .query({opt_pretty: 'true'})
     .auth(ASANA_KEY,'')
     .end(function(res){
       if (res.ok) {
-        me = res.body['data'];
-        if (verbose) {
-          console.log('');
-          console.log('    name: '.blue+me['name']);
-          console.log('    email: '.blue+me['email']);
-          console.log('    id: '.blue+me['id']);
-          console.log('');
-          if (me['workspaces']) {
-            printWorkspaces(me['workspaces']);
-          }
+        var data = res.body['data'];
+
+        print('    name: '.blue+data['name'],
+              '    email: '.blue+data['email'],
+              '    id: '.blue+data['id']);
+
+        if (data['workspaces']) {
+          printChildren(data['workspaces'], 'Workspaces');
         }
+
+        projects();
       }
     });
 }
 
-function printWorkspaces(workspaces) {
+function printChildren(data, label) {
   var nodes, s;
-
-  workspaces = _.toArray(workspaces);
+  data = _.toArray(data);
 
   // map workspace.name => nodes.label for
   // archy support.
-  nodes = _.map(workspaces, function(workspace) {
-    return {'label': workspace['name']}
+  nodes = _.map(data, function(d) {
+    return {'label': d['name']}
   });
 
   s = archy({
-    label: 'Workspaces'.green,
+    label: label.green,
     nodes: nodes
   }, "    ");
 
-  console.log(s);
+  print(s);
+}
+
+function print() {
+  console.log('');
+  _.each(arguments, function(arg){
+    console.log(arg);
+  })
 }
