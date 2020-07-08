@@ -1,7 +1,8 @@
 asana-cli
 =========
 
-A CLI for Asana.
+A CLI for Asana.<br/>
+This has been updated and tested with Asana API 1.0 in july 2020.
 
 <br/>
 
@@ -36,6 +37,12 @@ A CLI for Asana.
 	    
 	    projects 
 	     -- List all projects
+	     
+	    api <method> <urlargs>
+	    -- Calls the Asana raw API 1.0, according to https://developers.asana.com/explorer
+	    -- example : bin/asana.js api GET '/users/me'
+	    -- example : bin/asana.js api GET '/projects/1234567890/tasks'
+	    -- note : do not forget to put 'urlargs' in simple quotes
 	
 	  Options:
 	
