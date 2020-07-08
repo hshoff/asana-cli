@@ -2,7 +2,7 @@ asana-cli
 =========
 
 A CLI for Asana.
-This has been uodated and tested with Asana API 1.0 in july 2020.
+This has been updated and tested with Asana API 1.0 in july 2020.
 
 <br/>
 
